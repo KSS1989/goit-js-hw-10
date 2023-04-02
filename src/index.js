@@ -15,32 +15,33 @@ input.addEventListener(
   }, DEBOUNCE_DELAY)
 );
 
-function onSearch(e) {
+async function onSearch(e) {
   const nameCountry = input.value.trim();
   cleanHtml();
 
   if (nameCountry !== '') {
-    fetchCountries(nameCountry).then(dataInfo => {
-      if (dataInfo.length > 10) {
+    try {
+      const data = await fetchCountries(nameCountry);
+      if (data.length > 10) {
         Notiflix.Notify.info(
           'Too many matches found. Please enter a more specific name.'
         );
-      } else if (dataInfo.length === 0) {
+      } else if (data.length === 0) {
         Notiflix.Notify.failure('Oops, there is no country with that name');
-      } else if (dataInfo.length >= 2 && dataInfo.length <= 10) {
-        renderCountryList(dataInfo);
-      } else if (dataInfo.length === 1) {
-        renderOneCountry(dataInfo);
+      } else if (data.length >= 2 && data.length <= 10) {
+        renderCountryList(data);
+      } else if (data.length === 1) {
+        renderCountry(data);
       }
-    });
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 
 function renderCountryList(countries) {
-  console.log(countries);
   const markup = countries
     .map(country => {
-      console.log(country);
       return `<li>
       <img src="${country.flags.svg}" alt="Flag of ${country.name.official}" width="30" hight="20">
         <b>${country.name.official}</p>
@@ -50,7 +51,7 @@ function renderCountryList(countries) {
   countryList.innerHTML = markup;
 }
 
-function renderOneCountry(countries) {
+function renderCountry(countries) {
   const markup = countries
     .map(country => {
       return `<li>
